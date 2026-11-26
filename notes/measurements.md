@@ -2,6 +2,9 @@
 
 All times are UTC. Recorded on 2026-11-26.
 
+Where a Netlify build time is marked "API", it is the `deploy_time` field. It
+matched the dashboard figure for the deploys in sections 1 and 3.
+
 ## URLs
 
 | Host | URL |
@@ -93,7 +96,7 @@ Source: Netlify deploy `6b082f4245c2837a7bc36068`.
 | Change | Notes only | Home page and task contract |
 | Netlify deploy created | 15:41:55 | 15:58:26 |
 | Netlify published | 15:42:05 | 15:58:37 |
-| Netlify dashboard build time | 9 s | 10 s |
+| Netlify build time (API) | 9 s | 10 s |
 | Cloudflare | No deployment | No deployment |
 
 - Cloudflare incident "Cloudflare Dashboard and Cloudflare API service issues":
@@ -116,7 +119,7 @@ Commit `3eba4f1` (notes only). Push started 17:52:16. Wrangler still unpinned.
 |---|---|---|
 | Build start | Deploy created 17:52:21 | 17:52:21 |
 | Live | 17:52:32 (published) | New page seen at 17:52:58 |
-| Dashboard build time | 10 s | 41 s (first deploy: 1 min 13 s) |
+| Build time (Netlify: API, Cloudflare: dashboard) | 10 s | 41 s (first deploy: 1 min 13 s) |
 
 Cloudflare compared with its first deploy:
 
@@ -152,3 +155,38 @@ Netlify adds two things to the HTML:
 - A comment advertising Netlify, with a link tagged `utm_source=ai-legible`.
 - `<script async src="/.netlify/scripts/hud?variant=public">`. The script was
   36372 bytes (11532 compressed). The build itself ships no JavaScript.
+
+## 7. First deploy with Wrangler pinned
+
+Commit `8c60e00` adds `wrangler@4.168.0` as a dev dependency (and these notes up
+to section 6). Push started 18:08:46.
+
+| | Netlify | Cloudflare Workers |
+|---|---|---|
+| Build start | Deploy created 18:08:50 | 18:08:51 |
+| Live | 18:09:05 (published) | 18:09:37 (triggers deployed) |
+| Build time (Netlify: API, Cloudflare: dashboard) | 13 s | 50 s |
+
+Cloudflare across its three builds:
+
+| | Initializing | Cloning | Installing | Building | Deploying | Total |
+|---|---|---|---|---|---|---|
+| First, unpinned | 26 s | 1 s | 8 s | 2 s | 36 s | 1 min 13 s |
+| Warm cache, unpinned | 14 s | 714 ms | 11 s | 2 s | 14 s | 41 s |
+| First pinned | 29 s | 731 ms | 10 s | 2 s | 8 s | 50 s |
+
+- The log showed both restore steps starting but, unlike the warm build, no
+  "restored" message for either. The lockfile had changed, which is the likely
+  reason for the dependency cache. Both caches were uploaded again at the end.
+- `npm clean-install` added 285 packages in 10 s (before the pin: 212).
+- Wrangler 4.168.0 started about 1.5 s after the deploy command, with no
+  separate download reported.
+- No assets needed uploading, because the page had not changed. This also
+  shortens the deploy phase, so its drop to 8 s is not due to the pin alone.
+- Initializing ranged from 14 to 29 s across the three builds, enough to hide
+  smaller differences in the totals.
+- Netlify took 13 s, against 8 to 11 s on its five earlier builds. Installing
+  the new dev dependency is a likely reason; its log was not read.
+
+Sources: Netlify deploy `6b0875b18a1bd8b619c825c2` (API), Cloudflare build
+`2d54a082` (build log).
