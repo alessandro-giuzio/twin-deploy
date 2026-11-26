@@ -223,3 +223,41 @@ Cloudflare, warm cache, without and with the pin:
 
 Source: Cloudflare build `51cb4a1b` (build log), Netlify deploy
 `6b0876d6b5cb97e8f1436533` (API).
+
+## 9. 404 behaviour with `404.astro`, no host configuration changed
+
+Commit `91143cb`. Push started 18:22:31.
+
+| Build | Netlify | Cloudflare Workers |
+|---|---|---|
+| New home page seen live | 18:22:51 | 18:23:26 |
+| Build time (Netlify: API, Cloudflare: dashboard) | 10 s | 52 s |
+
+Cloudflare phases: initializing 11 s, cloning 1 s, installing 25 s, building
+4 s, deploying 11 s. Both caches were restored. `npm clean-install` took 21 s for
+the same 285 packages that took 10 s in sections 7 and 8. Install time varies
+enough between runs that the 4 s difference in section 8 cannot be put down to
+the pin with confidence.
+
+404 requests, measured at 18:23 in the same way as section 2:
+
+| | Netlify | Cloudflare Workers |
+|---|---|---|
+| Status | 404 | 404 |
+| Body | The custom page, in Spanish | Empty |
+| Size | 1121 bytes (656 compressed), before: 3984 (1629) | 0 bytes, before: 0 |
+| `content-type` | `text/html; charset=utf-8` | None |
+| `cache-control` | `public,max-age=0,must-revalidate` | None |
+| Cache header | `cache-status`: `fwd=miss` on every request | None |
+| Time to first byte (6 requests) | 0.25 to 0.43 s | 0.14 to 0.17 s |
+| Direct request to `/404` | 200, 1121 bytes | 200, 586 bytes |
+| Direct request to `/404.html` | 200, 1121 bytes | 307 redirect to `/404` |
+
+- The result was the same for all three missing paths on each host.
+- Netlify used `404.html` with no configuration. Its 1121 bytes are the 586 bytes
+  of the local file plus the comment and script described in section 6.
+- Cloudflare uploaded the page (it is served at `/404`) but did not use it for
+  missing paths. `wrangler.jsonc` does not set `assets.not_found_handling`.
+
+Source: Cloudflare build `169c38a9` (build log), Netlify deploy
+`6b0878eaf27d416b500c7266` (API).
