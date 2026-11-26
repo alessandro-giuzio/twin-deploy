@@ -84,3 +84,25 @@ known. The first Cloudflare build is labelled "Manually deployed", so it does no
 show that a push had ever triggered one.
 
 Source: Netlify deploy `6b082f4245c2837a7bc36068`.
+
+## 4. Pushes while Cloudflare was disconnected
+
+| | `94742c7` | `c0fa4f0` |
+|---|---|---|
+| Change | Notes only | Home page and task contract |
+| Netlify deploy created | 15:41:55 | 15:58:26 |
+| Netlify published | 15:42:05 | 15:58:37 |
+| Netlify dashboard build time | 9 s | 10 s |
+| Cloudflare | No deployment | No deployment |
+
+- Cloudflare incident "Cloudflare Dashboard and Cloudflare API service issues":
+  posted 16:03:50, fix reported 16:39:33, still being monitored at 17:51.
+- While it was open, the dashboard loaded only an empty frame and a Wrangler API
+  request failed to authenticate. The site kept answering with status 200 from
+  the one location tested.
+- The incident does not explain the missing deploys on its own: the disconnected
+  warning appeared before it (section 3) and was still shown at about 17:47.
+- At about 17:51 the warning was gone, after the Git connection was fixed.
+- At about 16:04 the HTML served by Netlify was 2646 bytes, against 2111 in a
+  local build, and contained a "This site is hosted on Netlify" comment. The two
+  copies may not be byte-identical.
