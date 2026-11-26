@@ -9,7 +9,8 @@ All times are UTC. Recorded on 2026-11-26.
 | Netlify | https://twin-deploy.netlify.app/ |
 | Cloudflare Workers | https://twin-deploy.giuzio.workers.dev/ |
 
-Both rebuild on every push to `main`.
+Both are meant to rebuild on every push to `main`. On the first test push, only
+Netlify did (see section 3).
 
 ## 1. First deploy
 
@@ -60,3 +61,26 @@ and `Sec-Fetch-Mode: navigate` headers. Two requests per path. Paths:
 
 The result was the same for all three paths on each host. The timings are a
 small sample and not a performance comparison.
+
+## 3. Warm-cache deploy, first attempt
+
+Commit `eefcd32` (one line added to the page, plus these notes). Push started
+13:08:15.
+
+| | Netlify | Cloudflare Workers |
+|---|---|---|
+| Result | Deployed | No build started |
+| Build start | 13:08:19 | n/a |
+| Published | 13:08:28 | n/a |
+| New content seen live | 13:08:30 | Not seen; old page still served at 13:14:24 |
+| Dashboard build time | 8 s (first deploy: 11 s) | n/a |
+| Dependency cache | "Building with cache" | n/a |
+| npm install | "up to date" in 636 ms (first deploy: 205 packages in 3 s) | n/a |
+| Files uploaded | 1 | n/a |
+
+Cloudflare's build settings showed: "This project is disconnected from your Git
+account. This may cause deployments to fail." When or why it disconnected is not
+known. The first Cloudflare build is labelled "Manually deployed", so it does not
+show that a push had ever triggered one.
+
+Source: Netlify deploy `6b082f4245c2837a7bc36068`.
