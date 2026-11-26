@@ -1,16 +1,21 @@
 ---
+import '../styles/global.css';
 ---
 
-<html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<link rel="icon" href="/favicon.ico" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Astro</title>
-	</head>
-	<body>
-		<h1>Astro</h1>
-	</body>
+<html lang='es'>
+  <head>
+    <meta charset='utf-8' />
+    <meta name='viewport' content='width=device-width, initial-scale=1' />
+    <title>twin-deploy: un build, dos hosts</title>
+    <meta
+      name='description'
+      content='El mismo sitio Astro servido desde Netlify y Cloudflare, con mediciones reales.'
+    />
+  </head>
+  <body class='mx-auto max-w-2xl p-6'>
+    <h1 class='text-3xl font-bold'>Un build, dos hosts</h1>
+    <p class='mt-4'>
+      Este sitio se despliega igual en Netlify y en Cloudflare Workers.
+    </p>
+  </body>
 </html>
