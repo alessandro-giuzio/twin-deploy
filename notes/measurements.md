@@ -9,8 +9,9 @@ All times are UTC. Recorded on 2026-11-26.
 | Netlify | https://twin-deploy.netlify.app/ |
 | Cloudflare Workers | https://twin-deploy.giuzio.workers.dev/ |
 
-Both are meant to rebuild on every push to `main`. On the first test push, only
-Netlify did (see section 3).
+Both are meant to rebuild on every push to `main`. The first three test pushes
+deployed on Netlify only (sections 3 and 4). Both deployed `3eba4f1`
+(section 5).
 
 ## 1. First deploy
 
@@ -106,3 +107,48 @@ Source: Netlify deploy `6b082f4245c2837a7bc36068`.
 - At about 16:04 the HTML served by Netlify was 2646 bytes, against 2111 in a
   local build, and contained a "This site is hosted on Netlify" comment. The two
   copies may not be byte-identical.
+
+## 5. Warm-cache deploy on both hosts
+
+Commit `3eba4f1` (notes only). Push started 17:52:16. Wrangler still unpinned.
+
+| | Netlify | Cloudflare Workers |
+|---|---|---|
+| Build start | Deploy created 17:52:21 | 17:52:21 |
+| Live | 17:52:32 (published) | New page seen at 17:52:58 |
+| Dashboard build time | 10 s | 41 s (first deploy: 1 min 13 s) |
+
+Cloudflare compared with its first deploy:
+
+| | Initializing | Cloning | Installing | Building | Deploying |
+|---|---|---|---|---|---|
+| First | 26 s | 1 s | 8 s | 2 s | 36 s |
+| Warm cache | 14 s | 714 ms | 11 s | 2 s | 14 s |
+
+- Both caches were restored. Installing includes about 5 s to restore the
+  dependency cache, then `npm clean-install` for 212 packages in 4 s.
+- The log did not report installing Wrangler. About 2 s passed between the
+  deploy command and `wrangler 4.168.0` starting (first deploy: about 19 s for
+  the install step). The likely reason is that the restored dependency cache
+  held the earlier `npx` download. The log does not say so.
+- Initializing was also 12 s shorter, so the cache is not the only difference.
+- Cloudflare uploaded 2 assets and reused 2, in 1.27 s.
+- The two hosts did different work: Cloudflare had not yet deployed the new home
+  page, while Netlify already had.
+
+Sources: Netlify deploy `6b0871d5588de84844c09f06`, Cloudflare build `3ed7f003`.
+
+## 6. What each host serves
+
+Checked at 17:53, after both had deployed `3eba4f1`.
+
+| | Netlify | Cloudflare Workers |
+|---|---|---|
+| Home page size | 2646 bytes | 2111 bytes |
+| Same as local `dist/index.html` | No | Yes, byte for byte |
+
+Netlify adds two things to the HTML:
+
+- A comment advertising Netlify, with a link tagged `utm_source=ai-legible`.
+- `<script async src="/.netlify/scripts/hud?variant=public">`. The script was
+  36372 bytes (11532 compressed). The build itself ships no JavaScript.
