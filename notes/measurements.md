@@ -190,3 +190,36 @@ Cloudflare across its three builds:
 
 Sources: Netlify deploy `6b0875b18a1bd8b619c825c2` (API), Cloudflare build
 `2d54a082` (build log).
+
+## 8. Warm-cache deploy with Wrangler pinned
+
+Commit `7b3e70a` (home page and notes; dependencies unchanged). Push started
+18:13:38.
+
+| | Netlify | Cloudflare Workers |
+|---|---|---|
+| Build start | Deploy created 18:13:43 | 18:13:44 |
+| Published or triggers deployed | 18:13:54 | 18:14:33 |
+| New page seen live | 18:14:00 | 18:14:35 |
+| Build time (Netlify: API, Cloudflare: dashboard) | 10 s | 52 s |
+
+Cloudflare, warm cache, without and with the pin:
+
+| | Initializing | Cloning | Installing | Building | Deploying | Total |
+|---|---|---|---|---|---|---|
+| Unpinned (`3eba4f1`) | 14 s | 714 ms | 11 s | 2 s | 14 s | 41 s |
+| Pinned (`7b3e70a`) | 21 s | 1 s | 15 s | 2 s | 14 s | 52 s |
+
+- Both caches were restored. `npm clean-install` took 10 s for 285 packages,
+  against 4 s for 212 packages without the pin.
+- The deploy phase took 14 s both times. Wrangler started about 1.6 s after the
+  deploy command (unpinned warm build: 2.0 s).
+- Each build uploaded 2 assets and reused 2.
+- Of the 11 s difference in totals, 7 s is in initializing, before any project
+  step runs. Installing accounts for 4 s.
+- In these single runs, pinning did not make the warm build faster. It installs
+  more packages, and the unpinned warm build did not report downloading Wrangler
+  either. The pin fixes which version runs.
+
+Source: Cloudflare build `51cb4a1b` (build log), Netlify deploy
+`6b0876d6b5cb97e8f1436533` (API).

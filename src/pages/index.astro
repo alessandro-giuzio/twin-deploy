@@ -10,6 +10,7 @@ const deploys = [
   { name: 'Push 3', netlify: '10\u00a0s', cloudflare: noDeploy },
   { name: 'Push 4', netlify: '10\u00a0s', cloudflare: '41\u00a0s' },
   { name: 'Push 5', netlify: '13\u00a0s', cloudflare: '50\u00a0s' },
+  { name: 'Push 6', netlify: '10\u00a0s', cloudflare: '52\u00a0s' },
 ];
 ---
 
@@ -92,6 +93,10 @@ const deploys = [
           El push 5 fija la versión de Wrangler, la herramienta de despliegue de
           Cloudflare. En esa compilación, el registro no indicó que se
           recuperara ninguna caché.
+        </li>
+        <li>
+          En el push 6, Cloudflare recuperó sus cachés con la versión de Wrangler
+          ya fijada.
         </li>
       </ul>
     </main>
