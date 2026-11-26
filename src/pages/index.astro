@@ -13,10 +13,68 @@ import '../styles/global.css';
     />
   </head>
   <body class='mx-auto max-w-2xl p-6'>
-    <h1 class='text-3xl font-bold'>Un build, dos hosts</h1>
-    <p class='mt-4'>
-      Este sitio se despliega igual en Netlify y en Cloudflare Workers.
-    </p>
-    <p class='mt-4'>Cada push a main reconstruye ambos.</p>
+    <main>
+      <h1 class='text-3xl font-bold'>Un build, dos hosts</h1>
+      <p class='mt-4'>
+        Un experimento: el mismo sitio Astro, desplegado en Netlify y en
+        Cloudflare Workers, para comparar cómo se comporta cada uno.
+      </p>
+
+      <h2 class='mt-8 text-xl font-bold'>Las dos copias</h2>
+      <ul class='mt-2 list-disc pl-6'>
+        <li>
+          <a class='underline' href='https://twin-deploy.netlify.app/'>
+            Ver en Netlify
+          </a>
+        </li>
+        <li>
+          <a class='underline' href='https://twin-deploy.giuzio.workers.dev/'>
+            Ver en Cloudflare Workers
+          </a>
+        </li>
+      </ul>
+
+      <h2 class='mt-8 text-xl font-bold'>Mediciones</h2>
+      <div
+        class='mt-2 overflow-x-auto'
+        role='region'
+        aria-labelledby='tabla-despliegues'
+        tabindex='0'
+      >
+        <table class='w-full text-left'>
+          <caption id='tabla-despliegues' class='pb-2 text-left'>
+            Tiempo de compilación según el panel de cada host, 26 de noviembre de
+            2026
+          </caption>
+          <thead>
+            <tr class='border-b border-gray-400'>
+              <th scope='col' class='py-2 pr-3'>Despliegue</th>
+              <th scope='col' class='py-2 pr-3'>Netlify</th>
+              <th scope='col' class='py-2'>Cloudflare Workers</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class='border-b border-gray-300'>
+              <th scope='row' class='py-2 pr-3'>Primero</th>
+              <td class='py-2 pr-3'>11&nbsp;s</td>
+              <td class='py-2'>1&nbsp;min 13&nbsp;s</td>
+            </tr>
+            <tr class='border-b border-gray-300'>
+              <th scope='row' class='py-2 pr-3'>Segundo, tras un push</th>
+              <td class='py-2 pr-3'>8&nbsp;s</td>
+              <td class='py-2'>No se inició ninguna compilación</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p class='mt-3 text-sm'>
+        Cada cifra corresponde a una sola ejecución. Los dos tiempos salen de
+        paneles distintos y no son una comparación de rendimiento equivalente.
+      </p>
+      <p class='mt-2 text-sm'>
+        En el segundo intento, Cloudflare indicaba que el proyecto estaba
+        desconectado de la cuenta de Git.
+      </p>
+    </main>
   </body>
 </html>
