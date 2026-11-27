@@ -261,3 +261,47 @@ the pin with confidence.
 
 Source: Cloudflare build `169c38a9` (build log), Netlify deploy
 `6b0878eaf27d416b500c7266` (API).
+
+## 10. 404 behaviour with Cloudflare configured
+
+Commit `e939351` adds `"not_found_handling": "404-page"` under `assets` in
+`wrangler.jsonc`. Push started 19:18:58.
+
+| Build | Netlify | Cloudflare Workers |
+|---|---|---|
+| New page seen live | 19:19:19 | 19:19:48 |
+| Build time (Netlify: API, Cloudflare: dashboard) | 12 s | 49 s |
+
+Cloudflare phases: initializing 18 s, cloning 1 s, installing 13 s, building
+2 s, deploying 14 s. Both caches were restored, and `npm clean-install` took 11 s.
+
+404 requests, measured at 19:20 in the same way as section 2:
+
+| | Netlify | Cloudflare Workers |
+|---|---|---|
+| Status | 404 | 404 |
+| Body | The custom page | The custom page, identical to local `404.html` |
+| Size | 1121 bytes (656 compressed) | 586 bytes (368 compressed) |
+| `content-type` | `text/html; charset=utf-8` | `text/html` |
+| `cache-control` | `public,max-age=0,must-revalidate` | `public, max-age=0, must-revalidate` |
+| Cache header | `cache-status`: `fwd=miss` on every request | `cf-cache-status: HIT` on every request |
+| Time to first byte (6 requests) | 0.30 to 0.40 s | 0.15 to 0.19 s |
+| Direct request to `/404` | 200 | 200 |
+| Direct request to `/404.html` | 200 | 307 redirect to `/404` |
+
+The result was the same for all three missing paths on each host, and a request
+to `/no-such-page` without browser headers also got the custom page.
+
+Source: Cloudflare build `8058fee5` (build log), Netlify deploy
+`6b08862587229df943a51527` (API).
+
+## 404 summary
+
+| Stage | Netlify | Cloudflare Workers |
+|---|---|---|
+| Default (section 2) | Netlify's English page, 3984 bytes | Empty body |
+| `404.astro` added (section 9) | Custom page, no setting needed | Empty body |
+| `not_found_handling` set (section 10) | Custom page | Custom page |
+
+All three stages returned status 404 for missing paths. The timings come from one
+location and a few requests, so they are not a performance comparison.
